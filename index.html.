@@ -1,0 +1,494 @@
+
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SMOBX CASES</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--bg:#090811;--panel:#151322;--panel2:#1d1930;--purple:#8b5cf6;--pink:#d946ef;--text:#f7f4ff;--muted:#a49bb8;--green:#45df9b;--red:#ff657d}
+*{box-sizing:border-box}
+body{margin:0;background:radial-gradient(circle at top,#21133b 0,#090811 42%);color:var(--text);font-family:Arial,sans-serif;min-height:100vh}
+button,input,select{font:inherit}
+button{cursor:pointer;border:0}
+header{position:sticky;top:0;z-index:10;background:#0d0b16ed;backdrop-filter:blur(12px);border-bottom:1px solid #302344;padding:13px 16px}
+.top{max-width:1100px;margin:auto;display:flex;align-items:center;justify-content:space-between;gap:12px}
+.logo{font-weight:1000;font-size:22px;letter-spacing:1px}.logo span{color:#b68aff}
+.balance{background:#211a32;border:1px solid #49326b;border-radius:13px;padding:10px 13px;font-weight:bold;color:#e7d7ff}
+main{max-width:1100px;margin:auto;padding:18px 14px 60px}
+nav{display:flex;gap:8px;overflow-x:auto;padding:4px 0 14px;scrollbar-width:thin}
+nav button{white-space:nowrap;background:#171323;color:#c7bdd8;padding:11px 15px;border-radius:12px;border:1px solid #302640}
+nav button.active{background:linear-gradient(120deg,#7541d8,#a33cbd);color:white;border-color:transparent}
+.page{display:none}.page.active{display:block}
+h2{font-size:23px;margin:10px 0 6px}h3{margin:0 0 10px}
+.sub{color:var(--muted);font-size:13px;margin:0 0 18px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(145px,1fr));gap:12px}
+.card{background:linear-gradient(150deg,#1c1830,#12101d);border:1px solid #302640;border-radius:16px;padding:13px;min-width:0}
+.case-card{text-align:center;transition:.2s}
+.case-card:hover{transform:translateY(-3px);border-color:#8b5cf6}
+.case-icon{height:85px;display:grid;place-items:center;font-size:49px;background:radial-gradient(circle,#49306d,#211832 65%,transparent);border-radius:12px;margin-bottom:9px}
+.case-card h3{font-size:15px}.price{color:#d5b7ff;font-weight:bold;margin:8px 0}
+.primary{background:linear-gradient(120deg,#7541d8,#b43ec6);color:white;border-radius:11px;padding:11px 14px;font-weight:bold;width:100%}
+.secondary{background:#302344;color:#eee2ff;border:1px solid #594078;border-radius:10px;padding:9px 12px}
+.danger{background:#48202e;color:#ffb3c0;border-radius:10px;padding:9px 12px}
+button:disabled{opacity:.45;cursor:not-allowed}
+.skin-card{position:relative;overflow:hidden}
+.skin-art{height:82px;border-radius:11px;display:grid;place-items:center;font-size:38px;margin-bottom:9px;background:linear-gradient(135deg,#34224e,#171323)}
+.skin-name{font-weight:bold;font-size:13px;line-height:1.3;min-height:32px}
+.skin-value{font-size:13px;color:#d8baff;margin:7px 0}
+.rarity{font-size:10px;text-transform:uppercase;letter-spacing:1px;color:var(--rarity)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin:14px 0}
+.stat{background:#171323;border:1px solid #302640;padding:13px;border-radius:13px}
+.stat b{display:block;font-size:19px;margin-top:5px}.stat small{color:var(--muted)}
+input,select{width:100%;background:#100e19;border:1px solid #49365e;color:white;border-radius:10px;padding:12px;outline:none;margin:6px 0 12px}
+label{font-size:13px;color:#c5b8d8}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.empty{text-align:center;color:var(--muted);padding:35px 12px;background:#151220;border-radius:14px}
+.progress{height:9px;background:#302640;border-radius:20px;overflow:hidden;margin:10px 0}
+.progress div{height:100%;background:linear-gradient(90deg,#8b5cf6,#d946ef);width:0}
+#toast{position:fixed;bottom:20px;left:50%;transform:translate(-50%,20px);opacity:0;pointer-events:none;background:#2b2140;border:1px solid #7651a5;padding:12px 18px;border-radius:12px;z-index:50;transition:.25s;text-align:center;max-width:90%}
+#toast.show{opacity:1;transform:translate(-50%,0)}
+.modal{position:fixed;inset:0;background:#05040bdc;z-index:30;display:none;align-items:center;justify-content:center;padding:18px}
+.modal.show{display:flex}
+.modal-box{background:#171323;border:1px solid #62418a;border-radius:20px;padding:22px;width:min(420px,100%);text-align:center}
+.big-icon{font-size:75px;margin:14px}
+.spin{animation:spin .5s infinite alternate}
+@keyframes spin{from{transform:scale(.9) rotate(-8deg)}to{transform:scale(1.08) rotate(8deg)}}
+.small{font-size:12px;color:var(--muted)}
+.actions{display:flex;gap:8px;margin-top:10px}.actions button{flex:1}
+footer{text-align:center;color:#625a70;font-size:12px;padding:25px 0}
+@media(max-width:520px){.grid{grid-template-columns:repeat(2,minmax(0,1fr))}.stats{grid-template-columns:1fr 1fr}.two{grid-template-columns:1fr}.logo{font-size:19px}}
+</style>
+</head>
+<body>
+<header>
+ <div class="top">
+  <div class="logo">SMO<span>BX</span> CASES</div>
+  <div class="balance">🪙 <span id="coins">0</span></div>
+ </div>
+</header>
+<main>
+<nav id="nav">
+ <button class="active" data-page="cases">📦 Кейси</button>
+ <button data-page="upgrade">⚡ Апгрейд</button>
+ <button data-page="inventory">🎒 Інвентар</button>
+ <button data-page="catalog">🗂 Каталог</button>
+ <button data-page="tap">👆 Тап</button>
+ <button data-page="contracts">📜 Контракти</button>
+ <button data-page="bonus">🎁 Бонуси</button>
+ <button data-page="profile">👤 Профіль</button>
+</nav>
+
+<section class="page active" id="cases">
+ <h2>Відкривай кейси</h2>
+ <p class="sub">Обирай кейс і отримуй випадковий скін. Усі Coins — ігрові.</p>
+ <div class="grid" id="caseGrid"></div>
+</section>
+
+<section class="page" id="upgrade">
+ <h2>Апгрейд скінів</h2>
+ <p class="sub">Обери свій скін і дорожчий скін. Доплати немає. Якщо спроба невдала, вартість твого скіна зменшиться вдвічі.</p>
+ <div class="card">
+  <label>Твій скін</label>
+  <select id="upgradeSource"></select>
+  <label>Скін, який хочеш отримати</label>
+  <input id="targetSearch" placeholder="Пошук цільового скіна...">
+  <select id="upgradeTarget"></select>
+  <div class="stats">
+   <div class="stat"><small>Вартість твого</small><b id="sourceValue">—</b></div>
+   <div class="stat"><small>Вартість цілі</small><b id="targetValue">—</b></div>
+   <div class="stat"><small>Шанс успіху</small><b id="chance">—</b></div>
+  </div>
+  <button class="primary" id="upgradeBtn">⚡ КРУТИТИ АПГРЕЙД</button>
+  <p class="small" style="text-align:center;margin-top:12px">У разі невдачі предмет залишається в інвентарі, його ігрова вартість зменшується вдвічі.</p>
+ </div>
+</section>
+
+<section class="page" id="inventory">
+ <h2>Мій інвентар</h2>
+ <p class="sub">Тут зберігаються всі отримані скіни.</p>
+ <div class="row"><span id="inventoryCount">0 скінів</span><b id="inventoryWorth">0 Coins</b></div>
+ <div style="height:12px"></div>
+ <div class="grid" id="inventoryGrid"></div>
+</section>
+
+<section class="page" id="catalog">
+ <h2>Каталог скінів</h2>
+ <p class="sub">У каталозі понад 1000 різних скінів. Можна шукати та переглядати частинами, щоб сторінка працювала плавно.</p>
+ <input id="catalogSearch" placeholder="🔎 Знайти скін...">
+ <div class="row" style="margin-bottom:12px"><span id="catalogCount">0 скінів</span><select id="rarityFilter" style="width:145px;margin:0"><option value="all">Усі рідкості</option><option value="0">Звичайні</option><option value="1">Рідкісні</option><option value="2">Епічні</option><option value="3">Легендарні</option><option value="4">Міфічні</option></select></div>
+ <div class="grid" id="catalogGrid"></div>
+ <button class="secondary" id="loadMore" style="width:100%;margin-top:15px">Показати ще 60 скінів</button>
+</section>
+
+<section class="page" id="tap">
+ <h2>SMOBX TAP</h2>
+ <p class="sub">Натискай на кнопку, щоб заробляти Coins.</p>
+ <div class="card" style="text-align:center;padding:25px">
+  <div class="small">Твоя сила натискання</div>
+  <h2 id="tapPower">1 Coin</h2>
+  <button id="tapButton" style="width:180px;height:180px;border-radius:50%;font-size:65px;background:radial-gradient(circle at 35% 30%,#c78aff,#7136bd 65%,#35175e);box-shadow:0 0 35px #8b5cf655;color:white;margin:20px">🪙</button>
+  <div id="tapMessage" class="small">Натискай та збирай Coins!</div>
+  <div class="divider"></div>
+  <div class="row"><span>Покращення сили</span><b id="tapLevel">Рівень 1</b></div>
+  <p class="small">Наступне покращення: <b id="tapCost">100</b> Coins</p>
+  <button class="primary" id="tapUpgrade">Покращити силу</button>
+ </div>
+</section>
+
+<section class="page" id="contracts">
+ <h2>Контракти</h2>
+ <p class="sub">Обмінюй три скіни однакової рідкості на один скін наступного рівня.</p>
+ <div class="card">
+  <div class="row"><b>Твій контракт</b><span id="contractStatus" class="small">Потрібно 3 скіни</span></div>
+  <p>🎒 3 однакові за рідкістю → 🎁 1 скін наступної рідкості</p>
+  <button class="primary" id="contractBtn">Виконати контракт</button>
+ </div>
+ <div style="height:15px"></div>
+ <div class="grid" id="contractInventory"></div>
+</section>
+
+<section class="page" id="bonus">
+ <h2>Бонуси</h2>
+ <div class="card">
+  <div class="case-icon">🎁</div>
+  <h3>Щоденний бонус</h3>
+  <p class="sub">Забирай Coins один раз на день.</p>
+  <h2>+250 🪙</h2>
+  <button class="primary" id="dailyBtn">Забрати бонус</button>
+ </div>
+ <div class="card" style="margin-top:14px">
+  <h3>Промокод</h3>
+  <p class="sub">Введи промокод, щоб отримати ігрові Coins.</p>
+  <input id="promoInput" placeholder="Введи промокод">
+  <button class="primary" id="promoBtn">Активувати</button>
+  <p class="small">Спробуй: SMOBX100, START500 або PURPLE250</p>
+ </div>
+</section>
+
+<section class="page" id="profile">
+ <h2>Профіль гравця</h2>
+ <div class="card">
+  <div class="case-icon">👤</div>
+  <h2 id="playerName">SMOBX Player</h2>
+  <p class="sub">Твій ігровий профіль</p>
+  <div class="stats">
+   <div class="stat"><small>Coins</small><b id="profileCoins">0</b></div>
+   <div class="stat"><small>Скінів</small><b id="profileSkins">0</b></div>
+   <div class="stat"><small>Відкрито кейсів</small><b id="profileCases">0</b></div>
+  </div>
+  <button class="secondary" id="resetBtn" style="width:100%">Скинути прогрес</button>
+  <p class="small" style="margin-top:12px">Прогрес зберігається на цьому пристрої у браузері.</p>
+ </div>
+</section>
+<footer>SMOBX CASES • Fan-made game • Virtual Coins only</footer>
+</main>
+
+<div id="toast"></div>
+<div class="modal" id="modal">
+ <div class="modal-box">
+  <div id="modalTitle">Відкриття кейса</div>
+  <div class="big-icon spin" id="modalIcon">📦</div>
+  <h2 id="modalName">Удачі!</h2>
+  <p id="modalText" class="sub">Шукаємо твій скін...</p>
+  <button class="primary" id="modalClose" style="display:none">Забрати</button>
+ </div>
+</div>
+
+<script>
+const tg=window.Telegram?.WebApp;
+if(tg){tg.ready();tg.expand();}
+
+const rarityNames=["Звичайний","Рідкісний","Епічний","Легендарний","Міфічний"];
+const rarityColors=["#aaa4b4","#55b8ff","#c17aff","#ffbd55","#ff6cbd"];
+const emojis=["🔫","⚔️","🗡️","🎯","🛡️","💎","🔥","🌙","🐉","👑","⭐","☄️","🦊","🐺","🦅","🌌"];
+const first=["Shadow","Neon","Crystal","Dragon","Phantom","Royal","Cyber","Frozen","Golden","Dark","Solar","Lunar","Venom","Storm","Mystic","Nova","Ghost","Inferno","Arctic","Violet"];
+const second=["Strike","Fang","Blade","Hunter","Rider","Pulse","Dream","Claw","Spirit","Wave","Core","Legend","Knight","Phantom","Flame","Edge","Reaper","Burst","Viper","Star"];
+const skins=[];
+let sid=0;
+for(let tier=0;tier<5;tier++){
+ for(let i=0;i<200;i++){
+  const name=first[(i*7+tier*3)%first.length]+" "+second[(i*11+tier*5)%second.length]+" "+(i+1);
+  const base=[30,120,500,2200,10000][tier];
+  const value=Math.round(base*(1+(i%20)*0.13));
+  skins.push({id:sid++,name,value,tier,emoji:emojis[(i+tier*3)%emojis.length]});
+ }
+}
+skins.sort((a,b)=>a.value-b.value);
+
+const cases=[
+ {name:"Starter Case",emoji:"📦",price:100,min:0,max:1},
+ {name:"Silver Case",emoji:"🥈",price:250,min:0,max:2},
+ {name:"Gold Case",emoji:"🥇",price:600,min:1,max:2},
+ {name:"Neon Case",emoji:"🌈",price:1200,min:1,max:3},
+ {name:"Dragon Case",emoji:"🐉",price:2500,min:2,max:3},
+ {name:"Phantom Case",emoji:"👻",price:5000,min:2,max:4},
+ {name:"Royal Case",emoji:"👑",price:10000,min:3,max:4},
+ {name:"Galaxy Case",emoji:"🌌",price:25000,min:3,max:4},
+ {name:"Mythic Case",emoji:"💠",price:50000,min:4,max:4}
+];
+
+const defaultState={
+ coins:1500,inventory:[],tapPower:1,tapLevel:1,casesOpened:0,
+ lastDaily:"",usedPromos:[],tapCount:0
+};
+let state;
+try{state={...defaultState,...JSON.parse(localStorage.getItem("smobx_cases_save")||"{}")}}
+catch(e){state={...defaultState}}
+if(!Array.isArray(state.inventory))state.inventory=[];
+if(!Array.isArray(state.usedPromos))state.usedPromos=[];
+let catalogShown=60,upgradeBusy=false;
+
+function save(){
+ localStorage.setItem("smobx_cases_save",JSON.stringify(state));
+ updateHeader();
+}
+function fmt(n){return Math.floor(n).toLocaleString("uk-UA")}
+function toast(msg){
+ const el=document.getElementById("toast");el.textContent=msg;el.classList.add("show");
+ setTimeout(()=>el.classList.remove("show"),2400);
+}
+function updateHeader(){
+ document.getElementById("coins").textContent=fmt(state.coins);
+ document.getElementById("profileCoins").textContent=fmt(state.coins);
+ document.getElementById("profileSkins").textContent=state.inventory.length;
+ document.getElementById("profileCases").textContent=state.casesOpened;
+ document.getElementById("tapPower").textContent=fmt(state.tapPower)+" Coins";
+ document.getElementById("tapLevel").textContent="Рівень "+state.tapLevel;
+ document.getElementById("tapCost").textContent=fmt(tapUpgradeCost());
+}
+function tapUpgradeCost(){return Math.floor(100*Math.pow(1.8,state.tapLevel-1))}
+function showPage(page){
+ document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id===page));
+ document.querySelectorAll("nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
+ if(page==="inventory")renderInventory();
+ if(page==="upgrade")renderUpgrade();
+ if(page==="contracts")renderContracts();
+ if(page==="profile")updateHeader();
+ window.scrollTo({top:0,behavior:"smooth"});
+}
+document.getElementById("nav").addEventListener("click",e=>{
+ const b=e.target.closest("button[data-page]");if(b)showPage(b.dataset.page);
+});
+
+function addSkin(skin){
+ state.inventory.push({uid:Date.now()+Math.random(),skinId:skin.id,value:skin.value});
+}
+function getSkin(item){return skins.find(s=>s.id===item.skinId)||skins[0]}
+function skinCard(s,owned=false){
+ return `<div class="card skin-card">
+  <div class="skin-art">${s.emoji}</div>
+  <div class="skin-name">${s.name}</div>
+  <div class="rarity" style="--rarity:${rarityColors[s.tier]}">${rarityNames[s.tier]}</div>
+  <div class="skin-value">🪙 ${fmt(s.value)}</div>
+ </div>`;
+}
+function renderCases(){
+ document.getElementById("caseGrid").innerHTML=cases.map((c,i)=>`
+ <div class="card case-card">
+  <div class="case-icon">${c.emoji}</div><h3>${c.name}</h3>
+  <div class="small">${rarityNames[c.min]} — ${rarityNames[c.max]}</div>
+  <div class="price">🪙 ${fmt(c.price)}</div>
+  <button class="primary" onclick="openCase(${i})">Відкрити</button>
+ </div>`).join("");
+}
+function chooseSkin(min,max){
+ const pool=skins.filter(s=>s.tier>=min&&s.tier<=max);
+ return pool[Math.floor(Math.random()*pool.length)];
+}
+function openCase(index){
+ const c=cases[index];
+ if(state.coins<c.price){toast("Не вистачає Coins!");return}
+ state.coins-=c.price;
+ const result=chooseSkin(c.min,c.max);
+ state.casesOpened++;
+ save();
+ const modal=document.getElementById("modal");
+ document.getElementById("modalTitle").textContent="Відкриття "+c.name;
+ document.getElementById("modalIcon").textContent=c.emoji;
+ document.getElementById("modalIcon").classList.add("spin");
+ document.getElementById("modalName").textContent="Відкриваємо...";
+ document.getElementById("modalText").textContent="Твій скін уже в дорозі!";
+ document.getElementById("modalClose").style.display="none";
+ modal.classList.add("show");
+ setTimeout(()=>{
+  addSkin(result);save();
+  document.getElementById("modalIcon").classList.remove("spin");
+  document.getElementById("modalIcon").textContent=result.emoji;
+  document.getElementById("modalName").textContent=result.name;
+  document.getElementById("modalText").textContent=rarityNames[result.tier]+" • 🪙 "+fmt(result.value);
+  document.getElementById("modalClose").style.display="block";
+ },1300);
+}
+document.getElementById("modalClose").onclick=()=>document.getElementById("modal").classList.remove("show");
+
+function renderInventory(){
+ const grid=document.getElementById("inventoryGrid");
+ document.getElementById("inventoryCount").textContent=state.inventory.length+" скінів";
+ document.getElementById("inventoryWorth").textContent=fmt(state.inventory.reduce((a,b)=>a+b.value,0))+" Coins";
+ if(!state.inventory.length){grid.innerHTML='<div class="empty" style="grid-column:1/-1">Інвентар поки порожній. Відкрий перший кейс!</div>';return}
+ grid.innerHTML=state.inventory.map(item=>{
+  const s=getSkin(item);
+  return `<div class="card skin-card">
+   <div class="skin-art">${s.emoji}</div><div class="skin-name">${s.name}</div>
+   <div class="rarity" style="--rarity:${rarityColors[s.tier]}">${rarityNames[s.tier]}</div>
+   <div class="skin-value">🪙 ${fmt(item.value)}</div>
+   <button class="secondary" style="width:100%" onclick="sellSkin('${item.uid}')">Продати за Coins</button>
+  </div>`;
+ }).join("");
+}
+function sellSkin(uid){
+ const i=state.inventory.findIndex(x=>String(x.uid)===String(uid));if(i<0)return;
+ const item=state.inventory.splice(i,1)[0];
+ state.coins+=Math.floor(item.value*.7);save();renderInventory();
+ toast("Скін продано за "+fmt(Math.floor(item.value*.7))+" Coins");
+}
+
+function renderUpgrade(){
+ const source=document.getElementById("upgradeSource");
+ const previous=source.value;
+ source.innerHTML=state.inventory.map(item=>{
+  const s=getSkin(item);return `<option value="${item.uid}">${s.name} — ${fmt(item.value)} Coins</option>`;
+ }).join("");
+ if(previous&&state.inventory.some(x=>String(x.uid)===previous))source.value=previous;
+ updateUpgradeTargets();
+}
+function selectedItem(){
+ return state.inventory.find(x=>String(x.uid)===document.getElementById("upgradeSource").value);
+}
+function updateUpgradeTargets(){
+ const item=selectedItem(),select=document.getElementById("upgradeTarget");
+ const search=document.getElementById("targetSearch").value.toLowerCase();
+ if(!item){select.innerHTML="";document.getElementById("sourceValue").textContent="—";document.getElementById("targetValue").textContent="—";document.getElementById("chance").textContent="—";return}
+ const options=skins.filter(s=>s.value>item.value&&s.name.toLowerCase().includes(search)).slice(0,250);
+ select.innerHTML=options.map(s=>`<option value="${s.id}">${s.name} — ${fmt(s.value)} Coins</option>`).join("");
+ if(!options.length)select.innerHTML='<option value="">Немає відповідних скінів</option>';
+ updateUpgradeInfo();
+}
+function updateUpgradeInfo(){
+ const item=selectedItem(),target=skins.find(s=>s.id===Number(document.getElementById("upgradeTarget").value));
+ document.getElementById("sourceValue").textContent=item?fmt(item.value):"—";
+ document.getElementById("targetValue").textContent=target?fmt(target.value):"—";
+ const chance=item&&target?Math.max(5,Math.min(90,Math.floor(item.value/target.value*100))):0;
+ document.getElementById("chance").textContent=target?chance+"%":"—";
+ document.getElementById("upgradeBtn").disabled=!item||!target||upgradeBusy;
+}
+document.getElementById("upgradeSource").onchange=updateUpgradeTargets;
+document.getElementById("upgradeTarget").onchange=updateUpgradeInfo;
+document.getElementById("targetSearch").oninput=updateUpgradeTargets;
+document.getElementById("upgradeBtn").onclick=()=>{
+ if(upgradeBusy)return;
+ const item=selectedItem(),target=skins.find(s=>s.id===Number(document.getElementById("upgradeTarget").value));
+ if(!item||!target||target.value<=item.value)return;
+ const chance=Math.max(5,Math.min(90,Math.floor(item.value/target.value*100)));
+ upgradeBusy=true;updateUpgradeInfo();
+ const modal=document.getElementById("modal");
+ document.getElementById("modalTitle").textContent="SMOBX UPGRADE";
+ document.getElementById("modalIcon").textContent="⚡";
+ document.getElementById("modalIcon").classList.add("spin");
+ document.getElementById("modalName").textContent="Апгрейд крутиться...";
+ document.getElementById("modalText").textContent="Шанс успіху: "+chance+"%";
+ document.getElementById("modalClose").style.display="none";
+ modal.classList.add("show");
+ setTimeout(()=>{
+  const success=Math.random()*100<chance;
+  const index=state.inventory.findIndex(x=>String(x.uid)===String(item.uid));
+  if(index>=0){
+   if(success){
+    state.inventory.splice(index,1);
+    addSkin(target);
+    document.getElementById("modalIcon").textContent="🏆";
+    document.getElementById("modalName").textContent="АПГРЕЙД УДАВСЯ!";
+    document.getElementById("modalText").textContent="Ти отримав: "+target.name+" • "+fmt(target.value)+" Coins";
+   }else{
+    item.value=Math.max(1,Math.floor(item.value/2));
+    document.getElementById("modalIcon").textContent="💔";
+    document.getElementById("modalName").textContent="Цього разу не вийшло";
+    document.getElementById("modalText").textContent="Твій скін залишився, його нова вартість: "+fmt(item.value)+" Coins";
+   }
+  }
+  document.getElementById("modalIcon").classList.remove("spin");
+  document.getElementById("modalClose").style.display="block";
+  upgradeBusy=false;save();renderUpgrade();
+ },1500);
+};
+
+function renderCatalog(){
+ const q=document.getElementById("catalogSearch").value.toLowerCase();
+ const tier=document.getElementById("rarityFilter").value;
+ let list=skins.filter(s=>(s.name.toLowerCase().includes(q))&&(tier==="all"||String(s.tier)===tier));
+ document.getElementById("catalogCount").textContent=fmt(list.length)+" скінів знайдено";
+ const shown=list.slice(0,catalogShown);
+ document.getElementById("catalogGrid").innerHTML=shown.map(s=>skinCard(s)).join("")||'<div class="empty" style="grid-column:1/-1">Нічого не знайдено</div>';
+ document.getElementById("loadMore").style.display=shown.length<list.length?"block":"none";
+}
+document.getElementById("catalogSearch").oninput=()=>{catalogShown=60;renderCatalog()};
+document.getElementById("rarityFilter").onchange=()=>{catalogShown=60;renderCatalog()};
+document.getElementById("loadMore").onclick=()=>{catalogShown+=60;renderCatalog()};
+
+document.getElementById("tapButton").onclick=()=>{
+ state.coins+=state.tapPower;state.tapCount++;save();
+ const msg=document.getElementById("tapMessage");
+ msg.textContent="+"+fmt(state.tapPower)+" Coins!";
+};
+document.getElementById("tapUpgrade").onclick=()=>{
+ const cost=tapUpgradeCost();
+ if(state.coins<cost){toast("Не вистачає Coins!");return}
+ state.coins-=cost;state.tapLevel++;state.tapPower=Math.floor(state.tapPower*1.7)+1;
+ save();toast("Силу натискання покращено!");
+};
+
+function renderContracts(){
+ const grid=document.getElementById("contractInventory");
+ const counts=[0,0,0,0,0];
+ state.inventory.forEach(item=>counts[getSkin(item).tier]++);
+ document.getElementById("contractStatus").textContent=counts.map((n,i)=>n>=3?rarityNames[i]+": "+n:"").filter(Boolean).join(" • ")||"Потрібно 3 однакові за рідкістю";
+ grid.innerHTML=state.inventory.map(item=>skinCard({...getSkin(item),value:item.value})).join("")||'<div class="empty" style="grid-column:1/-1">Поки немає скінів для контракту</div>';
+}
+document.getElementById("contractBtn").onclick=()=>{
+ const counts=[0,0,0,0,0];
+ state.inventory.forEach(item=>counts[getSkin(item).tier]++);
+ const tier=counts.findIndex((n,i)=>n>=3&&i<4);
+ if(tier<0){toast("Потрібно 3 скіни однієї рідкості!");return}
+ let removed=0;
+ for(let i=state.inventory.length-1;i>=0&&removed<3;i--){
+  if(getSkin(state.inventory[i]).tier===tier){state.inventory.splice(i,1);removed++}
+ }
+ const result=chooseSkin(tier+1,tier+1);addSkin(result);save();renderContracts();
+ toast("Контракт виконано! Ти отримав "+result.name);
+};
+
+function today(){const d=new Date();return d.getFullYear()+"-"+(d.getMonth()+1)+"-"+d.getDate()}
+function updateDaily(){
+ const claimed=state.lastDaily===today();
+ document.getElementById("dailyBtn").disabled=claimed;
+ document.getElementById("dailyBtn").textContent=claimed?"Бонус уже забрано":"Забрати +250 Coins";
+}
+document.getElementById("dailyBtn").onclick=()=>{
+ if(state.lastDaily===today())return;
+ state.coins+=250;state.lastDaily=today();save();updateDaily();toast("Ти отримав 250 Coins!");
+};
+document.getElementById("promoBtn").onclick=()=>{
+ const code=document.getElementById("promoInput").value.trim().toUpperCase();
+ const promos={"SMOBX100":100,"START500":500,"PURPLE250":250};
+ if(!promos[code]){toast("Такого промокоду немає");return}
+ if(state.usedPromos.includes(code)){toast("Цей промокод уже використано");return}
+ state.coins+=promos[code];state.usedPromos.push(code);save();
+ document.getElementById("promoInput").value="";
+ toast("Промокод активовано! +"+promos[code]+" Coins");
+};
+document.getElementById("resetBtn").onclick=()=>{
+ if(!confirm("Точно скинути весь прогрес? Це не можна буде скасувати."))return;
+ localStorage.removeItem("smobx_cases_save");
+ state={...defaultState,inventory:[],usedPromos:[]};
+ save();renderAll();showPage("cases");toast("Прогрес скинуто");
+};
+function renderAll(){
+ updateHeader();renderCases();renderInventory();renderUpgrade();renderCatalog();renderContracts();updateDaily();
+}
+renderAll();
+</script>
+</body>
+</html>
